@@ -1,0 +1,218 @@
+table Data_Cleaning
+	lineageTag: 6ccd3def-f34f-4077-bb00-e20827be78f4
+
+	measure 'Total Sales' = SUM(Data_Cleaning[Total Sale])
+		formatString: #,##0.00
+		displayFolder: Sales Metrics
+		lineageTag: c0cab3e6-088e-49cf-9332-32c530514118
+
+	measure 'Total Quantity' = SUM(Data_Cleaning[Quantity])
+		formatString: #,##0
+		displayFolder: Sales Metrics
+		lineageTag: e38d4694-8cfb-4b9e-82a4-1c353c272d8e
+
+	measure 'Total Orders' = DISTINCTCOUNT(Data_Cleaning[OrderID])
+		formatString: #,##0
+		displayFolder: Sales Metrics
+		lineageTag: 563329e6-f61e-4931-80b8-78f88317b672
+
+	measure 'Average Order Value' = DIVIDE([Total Sales], [Total Orders])
+		formatString: #,##0.00
+		displayFolder: Sales Metrics
+		lineageTag: 16afaf5f-736c-4269-a655-20da8f17d665
+
+	measure 'Sales YTD' = TOTALYTD([Total Sales], 'Date'[Date])
+		formatString: #,##0.00
+		displayFolder: Time Intelligence
+		lineageTag: 9a7d9f47-119f-4123-8c6f-11f0ec7087da
+
+	measure 'Sales QTD' = TOTALQTD([Total Sales], 'Date'[Date])
+		formatString: #,##0.00
+		displayFolder: Time Intelligence
+		lineageTag: 00c6a22b-dd79-4a7a-a6d5-8c94563db19e
+
+	measure 'Sales MTD' = TOTALMTD([Total Sales], 'Date'[Date])
+		formatString: #,##0.00
+		displayFolder: Time Intelligence
+		lineageTag: 20a04d07-c54e-44ac-b982-f0e217813958
+
+	measure 'Sales Last Year' = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: #,##0.00
+		displayFolder: Time Intelligence
+		lineageTag: 621d8286-1764-4a99-99a1-04e9237013e9
+
+	measure 'Sales YoY Change' = [Total Sales] - [Sales Last Year]
+		formatString: #,##0.00;-#,##0.00
+		displayFolder: Time Intelligence
+		lineageTag: 88dc02b2-fc59-4c03-a6c4-34e044abff75
+
+	measure 'Sales YoY %' = DIVIDE([Sales YoY Change], [Sales Last Year])
+		formatString: 0.0%;-0.0%
+		displayFolder: Time Intelligence
+		lineageTag: 5dd22593-b183-4a3d-b50d-4d2c47f7b7ce
+
+	measure 'Sales Previous Month' = CALCULATE([Total Sales], DATEADD('Date'[Date], -1, MONTH))
+		formatString: #,##0.00
+		displayFolder: Time Intelligence
+		lineageTag: 72f318e3-bdee-4c68-929c-39b64ad30ec4
+
+	measure 'Sales MoM %' = DIVIDE([Total Sales] - [Sales Previous Month], [Sales Previous Month])
+		formatString: 0.0%;-0.0%
+		displayFolder: Time Intelligence
+		lineageTag: bb02b902-8651-4e16-abd1-d515b5870f83
+
+	measure 'Sales % of Total' = DIVIDE([Total Sales], CALCULATE([Total Sales], ALLSELECTED(Data_Cleaning)))
+		formatString: 0.0%
+		displayFolder: Share & Ranking
+		lineageTag: 375ae557-9634-412e-a501-da04c1c7151d
+
+	measure 'Region % of Sales' = DIVIDE([Total Sales], CALCULATE([Total Sales], ALLSELECTED(Data_Cleaning[Region])))
+		formatString: 0.0%
+		displayFolder: Share & Ranking
+		lineageTag: 17ceeafd-ce87-4a20-a6f2-20f3a5c2ccd4
+
+	measure 'Category % of Sales' = DIVIDE([Total Sales], CALCULATE([Total Sales], ALLSELECTED(Data_Cleaning[Category])))
+		formatString: 0.0%
+		displayFolder: Share & Ranking
+		lineageTag: 442d227e-3742-41b9-b97c-d421e0e6e81a
+
+	measure 'Product Rank' = RANKX(ALLSELECTED(Data_Cleaning[Product Name]), [Total Sales], , DESC, Dense)
+		formatString: 0
+		displayFolder: Share & Ranking
+		lineageTag: 127e21e2-4fbc-4496-9691-705ca834171e
+
+	measure 'Total Customers' = DISTINCTCOUNT(Data_Cleaning[CustomerName])
+		formatString: #,##0
+		displayFolder: Share & Ranking
+		lineageTag: 3c93de43-7a3f-4cfd-9b24-86dc45291d90
+
+	measure 'Avg Units per Order' = DIVIDE([Total Quantity], [Total Orders])
+		formatString: #,##0.0
+		displayFolder: Sales Metrics
+		lineageTag: 4ae572e9-3847-4147-ba78-5b3bc9aa9aaf
+
+	measure 'Average Sales' = CALCULATE(AVERAGE(Data_Cleaning[Total Sale]),'Date'[Date])
+		displayFolder: Sales Metrics
+		lineageTag: fa1a08c9-0998-483a-b43a-9f8c8c988c9a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Average Monthly Sales' = AVERAGEX(ALLSELECTED('Date'[Year-Month]), [Total Sales])
+		formatString: #,##0.00
+		displayFolder: Trend
+		lineageTag: 0cbfa365-d4c3-4c81-88ef-133b6756ab84
+
+	measure '3M Moving Avg' =
+			VAR _Last3Months = DATESINPERIOD('Date'[Date], MAX('Date'[Date]), -3, MONTH)
+			RETURN
+			DIVIDE(CALCULATE([Total Sales], _Last3Months), 3)
+		formatString: #,##0.00
+		displayFolder: Trend
+		lineageTag: 2f115ec0-2777-4bff-ae6c-3e737fddbdf4
+
+	column OrderID
+		dataType: int64
+		formatString: 0
+		lineageTag: 4ef2a522-c5a6-4a81-bb8a-a9940213cf9e
+		summarizeBy: sum
+		sourceColumn: "OrderID "
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 6f818230-3bf9-406d-b8c1-c42eaf3f698e
+		summarizeBy: none
+		sourceColumn: "OrderDate "
+
+		variation Variation
+			isDefault
+			relationship: 07cafa25-2c04-4e48-8ad7-fd0c27013f2b
+			defaultHierarchy: LocalDateTable_2a892c21-394e-4e56-8277-ae10e8504a3f.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column CustomerName
+		dataType: string
+		lineageTag: ed7a1425-6217-478e-8ae8-7f46f607ee80
+		summarizeBy: none
+		sourceColumn: "CustomerName "
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: cf862ad3-5bbc-4d05-a25b-26e4c501217c
+		summarizeBy: none
+		sourceColumn: "Product Name "
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 7b4780a2-4563-4b02-b952-daa803740c61
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 788bf7de-65a8-481c-b035-264fefa5af2b
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Price
+		dataType: double
+		lineageTag: f99d8a43-a5ac-455f-9ad2-34fe85b4eff8
+		summarizeBy: sum
+		sourceColumn: Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Total Sale'
+		dataType: double
+		formatString: "₹"\ #,0.00;-"₹"\ #,0.00;"₹"\ #,0.00
+		lineageTag: c8835cdf-c38e-4f03-b4a6-2f4e7f366c6c
+		summarizeBy: sum
+		sourceColumn: Total Sale
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"brx-IN"}
+
+	column Region
+		dataType: string
+		lineageTag: b57c5b32-2846-4527-b7f2-07d139c06e99
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Data_Cleaning = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("D:\Project\Power BI project\Power_BI_Project\Project_1\SalesDashboard_Presentation.xlsx"), null, true),
+				    Data_Cleaning_Sheet = Source{[Item="Data_Cleaning",Kind="Sheet"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Data_Cleaning_Sheet, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"1. Removed duplicate rows.", type any}, {"Column2", type any}, {"Column3", type text}, {"Column4", type text}, {"Column5", type text}, {"Column6", type any}, {"Column7", type any}, {"Column8", type any}, {"Column9", type text}}),
+				    #"Removed Top Rows" = Table.Skip(#"Changed Type",4),
+				    #"Promoted Headers1" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers1",{{"OrderID ", Int64.Type}, {"OrderDate ", type date}, {"CustomerName ", type text}, {"Product Name ", type text}, {"Category", type text}, {"Quantity", Int64.Type}, {"Price", type number}, {"Total Sale", type number}, {"Region", type text}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

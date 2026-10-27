@@ -1,0 +1,9 @@
+relationship 07cafa25-2c04-4e48-8ad7-fd0c27013f2b
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Data_Cleaning.OrderDate
+	toColumn: LocalDateTable_2a892c21-394e-4e56-8277-ae10e8504a3f.Date
+
+relationship Data_Cleaning_OrderDate_Date_Date
+	fromColumn: Data_Cleaning.OrderDate
+	toColumn: Date.Date
+
